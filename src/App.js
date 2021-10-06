@@ -23,18 +23,28 @@ export default function App() {
   }, []);
 
   async function handleLikeRepository(id) {
-    await api.post(`repositories/${id}/like`);
+    const response = await api.post(`repositories/${id}/like`);
 
-    api.get('repositories').then(response => {
-      setRepositories(response.data);
+    const likedRepository = response.data;
+
+    console.log(likedRepository);
+
+    const repositoriesUpdated = repositories.map(repositorie => {
+      if (repositorie.id === id) {
+        return likedRepository;
+      } else {
+        return repositorie;
+      }
     });
+
+    setRepositories(repositoriesUpdated);
   }
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
-        <View style={styles.repositoryContainer}>
+        
 
           <FlatList
 
@@ -42,71 +52,42 @@ export default function App() {
             keyExtractor={repositorie => repositorie.id}
             renderItem={({item: repositorie}) => (
               
+              <View style={styles.repositoryContainer}>
                 <Text style={styles.repository}>{repositorie.title}</Text>
-              
-            )
-              
-            }
 
-          />
+                <View style={styles.techsContainer}>
+                  {repositorie.techs.map(tech => (
+                    <Text key={tech} style={styles.tech}>
+                      {tech}
+                    </Text>
+                  ))}
+                </View>
 
-          <FlatList
+                <View style={styles.likesContainer}>
+                  <Text
+                    style={styles.likeText}
+                    // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
+                    testID={`repository-likes-${repositorie.id}`}
+                  >
+                    {repositorie.likes} curtidas
+                  </Text>
+                </View>
 
-            data={repositories}
-            keyExtractor={repositorie => repositorie.id}
-            renderItem={({item: repositorie}) => (
-              <View style={styles.techsContainer}>
-                <Text style={styles.tech}>
-                  {repositorie.tech}
-                </Text>
-                <Text style={styles.tech}>
-                  {repositorie.tech}
-                </Text>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => handleLikeRepository(repositorie.id)}
+                  // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
+                  testID={`like-button-${repositorie.id}`}
+                >
+                  <Text style={styles.buttonText}>Curtir</Text>
+                </TouchableOpacity>
               </View>
+              
             )
               
             }
 
           />
-
-          <FlatList
-
-            data={repositories}
-            keyExtractor={repositorie => repositorie.id}
-            renderItem={({item: repositorie}) => (
-              <View style={styles.likesContainer}>
-                <Text
-                  style={styles.likeText}
-                  // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
-                  testID={`repository-likes-${repositorie.id}`}
-                >{repositorie.likes} curtidas</Text>
-              </View>
-            )
-              
-            }
-
-          />
-
-          <FlatList
-
-            data={repositories}
-            keyExtractor={repositorie => repositorie.id}
-            renderItem={({item: repositorie}) => (
-              <TouchableOpacity
-              style={styles.button}
-              onPress={() => handleLikeRepository(repositorie.id)}
-              // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
-              testID={`like-button-${repositorie.id}`}
-              >
-                <Text style={styles.buttonText}>Curtir</Text>
-              </TouchableOpacity>
-            )
-              
-            }
-
-          />
-
-        </View>
       </SafeAreaView>
     </>
   );
